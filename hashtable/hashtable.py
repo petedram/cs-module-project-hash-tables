@@ -6,6 +6,11 @@ class HashTableEntry:
         self.key = key
         self.value = value
         self.next = None
+    
+    # def __str__(self):
+    #     return f'{self.value}'
+
+
 
 
 # Hash table can't have fewer than this many slots
@@ -96,7 +101,9 @@ class HashTable:
         # Your code here
 
         #turn the string into an index
-        idx = self.hash_index(value)
+        idx = self.hash_index(key)
+        print(f'the index of {key} is {idx}')
+
         #put the string at that index in our array
         self.data[idx] = HashTableEntry(idx, value)
 
@@ -115,7 +122,7 @@ class HashTable:
         idx = self.hash_index(key)
 
         # set to none
-        self.data[idx] = None
+        self.data[idx].value = None
 
 
     def get(self, key):
@@ -134,7 +141,7 @@ class HashTable:
         #go and access element at that index
         item = self.data[idx]
         #return the value
-        return item
+        return item.value
 
 
     def resize(self, new_capacity):
@@ -184,8 +191,24 @@ class HashTable:
 
 #     print("")
 
-ht = HashTable(0x10000)
-print(ht.capacity)
-ht.put("key-0", "val-0")
-print(ht.get("key-0"))
+# ht = HashTable(0x10000)
+# print(ht.capacity)
+# ht.put("key-0", "val-0")
+# ht.put("key-1", "val-1")
+# ht.put("key-2", "val-2")
+
+# return_value = ht.get("key-0")
+# print(return_value)
+
+# # self.assertTrue(return_value == "val-0")
+# return_value = ht.get("key-1")
+# print(return_value)
+
+# # self.assertTrue(return_value == "val-1")
+# return_value = ht.get("key-2")
+# print(return_value)
+
+# # self.assertTrue(return_value == "val-2")
+
+
 
