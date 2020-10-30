@@ -6,6 +6,8 @@ class HashTableEntry:
         self.key = key
         self.value = value
         self.next = None
+        # self.prev = None? Don't need to add LL class
+
     
     # def __str__(self):
     #     return f'{self.value}'
@@ -27,8 +29,12 @@ class HashTable:
 
     def __init__(self, capacity):
         # Your code here
-        self.capacity = capacity
+        self.capacity = max(capacity, MIN_CAPACITY)
         self.data = [None] * capacity
+
+        #array full of linked lists
+
+
 
 
     def get_num_slots(self):
@@ -42,7 +48,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return self.capacity
+        return len(self.data)
 
 
     def get_load_factor(self):
@@ -52,25 +58,81 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        pass
+        #if < 0.7, 
+        #make new array, double the size of old one
+        #iterate down the old array
+        #traverse down the linked list
+        #rehash and 'put' in new array
+
+        #check and trigger resize in 'put'
+        #if override, don't resize, if new then resize.
+        
+
+
+        
 
     def fnv1(self, key):
         """
         FNV-1 Hash, 64-bit
 
         Implement this, and/or DJB2.
+
+        ...prime numbers are like the atoms of other numbers. good for multiplying stuff.
+
+        0101010101010101
+        1101101101010101
+        ________________
+        1000111000000000
+
+        XOR will look at each pair of bits, if one only true will return 1 - building new number.
+
+        hashing functions are used in:
+        -git
+        -crypto currentcy
+        -password storage
+        -hash tables
+
+        some are fast, some are are slow, some more security, some less, etc.
+
+
+
         """
 
         # Your code here
-        pass
-        
+        FNV_offset_basis = 14695981039346656037
+        FNV_prime = 1099511628211
+        hashed = FNV_offset_basis
 
+        bytes_to_hash = key.encode()
+
+        for byte in bytes_to_hash:
+            hashed = hashed * FNV_prime
+
+            hashed = hashed ^ byte
+
+        return hashed
+        
+    
 
     def djb2(self, key):
         """
         DJB2 hash, 32-bit
 
         Implement this, and/or FNV-1.
+
+
+        bit wise operation - left bit shifting. bump it.
+        make it bigger by shifting it to the left.
+
+
+    01010111001101000000
+        
+        why 5381 and * 33 because they work!
+        what's work?
+            - irreversable
+            - nice distribution (to minimize collisions)
+
+
         """
         # Your code here
         hash = 5381
@@ -100,6 +162,15 @@ class HashTable:
         """
         # Your code here
 
+        #check for collision
+        if self.data != None:
+            print('warning! collision')
+
+        #Linear probing: keep going until find open slot.
+        #hash key, check if it is the key, if not iterate, then change value when found, if not found, add new node.
+
+
+
         #turn the string into an index
         idx = self.hash_index(key)
         print(f'the index of {key} is {idx}')
@@ -118,11 +189,17 @@ class HashTable:
         """
         # Your code here
 
+        #you delete item in LL by routing around it
+        #update the previous object from node.prev to have a next of node.next from deleted node.
+        #see example.
+
         #find value
         idx = self.hash_index(key)
 
         # set to none
         self.data[idx].value = None
+
+        #or self.put(key, None)
 
 
     def get(self, key):
@@ -134,6 +211,8 @@ class HashTable:
         Implement this.
         """
         # Your code here
+
+        #Store the key unhashed and compare key and see if it matches as we iterate through the list
 
         #turn num into index
         idx = self.hash_index(key)
