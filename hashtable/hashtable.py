@@ -1,3 +1,9 @@
+from singly_linked_list import LinkedList 
+
+#use add_to_head for the first item
+#use add_to_tail for subsequent items
+#use contains to 
+
 class HashTableEntry:
     """
     Linked List hash table key/value pair
@@ -11,8 +17,6 @@ class HashTableEntry:
     
     # def __str__(self):
     #     return f'{self.value}'
-
-
 
 
 # Hash table can't have fewer than this many slots
@@ -32,7 +36,10 @@ class HashTable:
         self.capacity = max(capacity, MIN_CAPACITY)
         self.data = [None] * capacity
 
+        self.load = 0
+
         #array full of linked lists
+
 
 
 
@@ -57,6 +64,9 @@ class HashTable:
 
         Implement this.
         """
+        load_factor = self.load / self.get_num_slots()
+        return load_factor
+
         # Your code here
         #if < 0.7, 
         #make new array, double the size of old one
@@ -66,7 +76,7 @@ class HashTable:
 
         #check and trigger resize in 'put'
         #if override, don't resize, if new then resize.
-        
+
 
 
         
@@ -149,7 +159,7 @@ class HashTable:
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
+        # return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -162,21 +172,44 @@ class HashTable:
         """
         # Your code here
 
-        #check for collision
-        if self.data != None:
-            print('warning! collision')
-
-        #Linear probing: keep going until find open slot.
-        #hash key, check if it is the key, if not iterate, then change value when found, if not found, add new node.
-
-
-
         #turn the string into an index
         idx = self.hash_index(key)
         print(f'the index of {key} is {idx}')
 
-        #put the string at that index in our array
-        self.data[idx] = HashTableEntry(idx, value)
+        #check for collision
+        if self.data[idx] != None:
+            print('warning! collision')
+            current_node = self.data[idx]
+
+            while current_node != None:
+                if current_node.key == key:
+                    current_node.value = value
+                    return
+                elif current_node.next == None:
+                    current_node.next = HashTableEntry(key, value)
+                    self.load +=1
+                current_node = current_node.next
+        
+        else:
+            self.data[idx] = HashTableEntry(key, value)
+            #increment load
+            self.load +=1
+
+        print(f'current load factor:{self.get_load_factor()}')
+
+        # tests fail if I trigger the re-size
+        # if self.get_load_factor() > 0.7:
+        #     new_capacity = self.capacity * 2
+        #     self.resize(new_capacity)
+
+
+
+        #Linear probing: keep going until find open slot.
+        #hash key, check if it is the key, if not iterate, then change value when found, if not found, add new node.
+
+    
+
+
 
 
     def delete(self, key):
@@ -196,10 +229,36 @@ class HashTable:
         #find value
         idx = self.hash_index(key)
 
+        if self.data[idx] != None:
+            if self.data[idx].key == key:
+                self.data[idx] = self.data[idx].next
+                return
+            
+            prev_node = self.data[idx]
+            current_node = self.data[idx].next
+
+            while current_node != None:
+                if current_node.key == key:
+                    prev_node.next = current_node.next
+                    return
+                else:
+                    prev_node = current_node
+                    current_node = current_node.next
+            
+            # self.load -=1
+
+        else:
+            print('no such key')
+        
+        pass
+
+
         # set to none
-        self.data[idx].value = None
+        # self.data[idx].value = None
 
         #or self.put(key, None)
+
+        #reduction of load
 
 
     def get(self, key):
@@ -211,16 +270,39 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
         #Store the key unhashed and compare key and see if it matches as we iterate through the list
+
+        # start at the head
+        # node = self.head
+        # while node is not None:
+        # # check for the target value
+        #     if node.value == target_value:
+        #         return node
+        # # move to next node
+        #     else:
+        #         node = node.next
+
 
         #turn num into index
         idx = self.hash_index(key)
 
+        if self.data[idx] != None:
+            current_node = self.data[idx]
+
+            while current_node != None:
+                if current_node.key == key:
+                    return current_node.value
+                elif current_node.next == None:
+                    return None
+                current_node = current_node.next
+        else:
+            return None
+
+
         #go and access element at that index
-        item = self.data[idx]
-        #return the value
-        return item.value
+        # item = self.data[idx]
+        # #return the value
+        # return item.value
 
 
     def resize(self, new_capacity):
@@ -231,9 +313,23 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        pass
+        print('resizing!!')
+        old_data = list(set(self.data))
 
+        self.capacity = max(new_capacity, MIN_CAPACITY)
+        #create new array
+        self.data = [None] * self.capacity
+        self.load = 0
 
+        #loop over and put the old data into new array
+        for item in old_data:
+            self.put(item.key, item.value)
+            if item.next != None:
+                current_node = item.next
+                while current_node != None:
+                    self.put(current_node.key, current_node.value)
+                    current_node = current_node.next
+                
 
 # if __name__ == "__main__":
 #     ht = HashTable(8)
